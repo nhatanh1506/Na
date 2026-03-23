@@ -614,49 +614,161 @@ function updStreak(last,today){
 const getStreak=()=>S.g('fp_sk')||0;
 
 /* ── TIMER ── */
-function startSess(){
-  if(isRest){toastMsg('Rest day active! Cancel it first.');return}
-  comboI=0;secsLeft=POMO;onBreak=false;mode='running';
-  sessStart=new Date();clearInterval(tick);tick=setInterval(doTick,1000);
-  renderTimer();renderPet();
+
+  function startSess(){
+  unlockAudio();
+  playSound('start');
+
+  if(isRest){
+    toastMsg('Rest day active! Cancel it first.');
+    return;
+  }
+
+  comboI=0;
+  secsLeft=POMO;
+  onBreak=false;
+  mode='running';
+  sessStart=new Date();
+  clearInterval(tick);
+  tick=setInterval(doTick,1000);
+
+  renderTimer();
+  renderPet();
 }
-function pauseSess(){if(mode!=='running')return;mode='paused';clearInterval(tick);renderTimer()}
-function contSess(){if(mode!=='paused')return;mode='running';tick=setInterval(doTick,1000);renderTimer();renderPet()}
+
+function pauseSess(){
+  if(mode!=='running') return;
+
+  playSound('pause');
+  mode='paused';
+  clearInterval(tick);
+  renderTimer();
+}
+
+function contSess(){
+  if(mode!=='paused') return;
+
+  unlockAudio();
+  playSound('start');
+  mode='running';
+  tick=setInterval(doTick,1000);
+
+  renderTimer();
+  renderPet();
+}
+
 function stopSess(){
-  if(mode==='idle'||mode==='done')return;
+  if(mode==='idle'||mode==='done') return;
+
+  playSound('pause');
   clearInterval(tick);
-  if(!onBreak){const e=Math.round((POMO-secsLeft)/60);if(e>0){saveSess(e,false);toastMsg(`Saved ${e} min ✓`)}}
-  mode='idle';secsLeft=POMO;comboI=0;onBreak=false;sessStart=null;
-  renderTimer();renderPet();renderQS();renderStats();
-}
-function restartSess(){
-  clearInterval(tick);
-  if(!onBreak){const e=Math.round((POMO-secsLeft)/60);if(e>0)saveSess(e,false)}
-  comboI=0;secsLeft=POMO;onBreak=false;mode='running';
-  sessStart=new Date();tick=setInterval(doTick,1000);
-  renderTimer();renderPet();
-}
-function skipBreak(){
-  clearInterval(tick);onBreak=false;comboI++;secsLeft=POMO;mode='running';
-  sessStart=new Date();tick=setInterval(doTick,1000);renderTimer();renderPet();
-}
-function doTick(){
-  if(secsLeft>0){secsLeft--;renderTimerFace();return}
+
   if(!onBreak){
-    clearInterval(tick);saveSess(25,true);addExp(EXP_S);
-    renderPet();renderQS();renderStats();renderAwards();
+    const e=Math.round((POMO-secsLeft)/60);
+    if(e>0){
+      saveSess(e,false);
+      toastMsg(`Saved ${e} min ✓`);
+    }
+  }
+
+  mode='idle';
+  secsLeft=POMO;
+  comboI=0;
+  onBreak=false;
+  sessStart=null;
+
+  renderTimer();
+  renderPet();
+  renderQS();
+  renderStats();
+}
+
+function restartSess(){
+  playSound('start');
+  clearInterval(tick);
+
+  if(!onBreak){
+    const e=Math.round((POMO-secsLeft)/60);
+    if(e>0) saveSess(e,false);
+  }
+
+  comboI=0;
+  secsLeft=POMO;
+  onBreak=false;
+  mode='running';
+  sessStart=new Date();
+  tick=setInterval(doTick,1000);
+
+  renderTimer();
+  renderPet();
+}
+
+function skipBreak(){
+  playSound('break');
+  clearInterval(tick);
+
+  onBreak=false;
+  comboI++;
+  secsLeft=POMO;
+  mode='running';
+  sessStart=new Date();
+  tick=setInterval(doTick,1000);
+
+  renderTimer();
+  renderPet();
+}
+
+function doTick(){
+  if(secsLeft>0){
+    secsLeft--;
+    renderTimerFace();
+    return;
+  }
+
+  if(!onBreak){
+    clearInterval(tick);
+    saveSess(25,true);
+    addExp(EXP_S);
+
+    renderPet();
+    renderQS();
+    renderStats();
+    renderAwards();
+
     if(comboI<comboN-1){
-      onBreak=true;secsLeft=BRK;mode='break';
+      onBreak=true;
+      secsLeft=BRK;
+      mode='break';
       tick=setInterval(doTick,1000);
-      toastMsg(`Session ${comboI+1}/${comboN} done! Break 🍃`);renderTimer();
+
+      playSound('break');
+      notify('Break time','Take a short break 🍃');
+
+      toastMsg(`Session ${comboI+1}/${comboN} done! Break 🍃`);
+      renderTimer();
     } else {
-      mode='done';secsLeft=0;comboI=0;
-      toastMsg(comboN>1?`Combo ${comboN}× complete! 🎉`:'Session complete! 🎉');renderTimer();
+      mode='done';
+      secsLeft=0;
+      comboI=0;
+
+      playSound('done');
+      notify('Session completed','Good job! Your pet is happy 🐱');
+
+      toastMsg(comboN>1 ? `Combo ${comboN}× complete! 🎉` : 'Session complete! 🎉');
+      renderTimer();
     }
   } else {
-    onBreak=false;comboI++;secsLeft=POMO;mode='running';
-    sessStart=new Date();toastMsg(`Session ${comboI+1}/${comboN} 🚀`);
-    renderTimer();renderPet();
+    onBreak=false;
+    comboI++;
+    secsLeft=POMO;
+    mode='running';
+    sessStart=new Date();
+
+    playSound('start');
+    toastMsg(`Session ${comboI+1}/${comboN} 🚀`);
+
+    renderTimer();
+    renderPet();
   }
 }
 
@@ -877,7 +989,9 @@ function goTab(t){
   if(t==='awards')renderAwards();
   if(t==='settings')renderSettings();
 }
-
+document.addEventListener('click', unlockAudio);
+document.addEventListener('touchstart', unlockAudio);
+requestNoti();
 boot();
 </script>
 </body>
