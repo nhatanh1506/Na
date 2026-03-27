@@ -1,0 +1,27 @@
+{
+  "name": "Focus Pet",
+  "short_name": "Focus Pet",
+  "description": "A virtual pet that grows stronger as you focus",
+  "start_url": "./focus-pet.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF7F2",
+  "theme_color": "#FF6B5B",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "lifestyle"],
+  "lang": "en"
+}
