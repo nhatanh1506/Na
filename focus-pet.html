@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- PWA meta tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Focus Pet">
+<meta name="theme-color" content="#FF6B5B">
 <link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
 <title>Focus Pet</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -176,6 +182,22 @@ body{font-family:var(--f);background:var(--cream);color:var(--ink);max-width:430
 .cp:active{transform:scale(.92)}
 .cp.sel{background:var(--coral-lt);color:var(--coral);border-color:var(--coral)}
 
+/* ── MUSIC SECTION ── */
+.mus-sec{margin:10px 14px 0;background:var(--card);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.mus-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.mus-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-soft)}
+.mus-ctrls{display:flex;gap:6px;align-items:center}
+.mus-btn{background:var(--warm);color:var(--ink-soft);border:1.5px solid var(--border);border-radius:50px;padding:5px 13px;font-family:var(--f);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.mus-btn:active{transform:scale(.93)}
+.mus-btn.active{background:var(--sky-lt);color:var(--sky);border-color:var(--sky)}
+.mus-power{background:var(--warm);color:var(--ink-soft);border:1.5px solid var(--border);border-radius:50px;padding:5px 13px;font-family:var(--f);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s}
+.mus-power:active{transform:scale(.93)}
+.mus-power.on{background:var(--sage-lt);color:var(--sage);border-color:var(--sage)}
+.mus-tracks{display:flex;gap:6px}
+.mtrack{flex:1;background:var(--warm);color:var(--ink-soft);border:2px solid transparent;border-radius:var(--rsm);padding:9px 4px;font-family:var(--f);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .18s cubic-bezier(.34,1.4,.64,1);text-align:center}
+.mtrack:active{transform:scale(.94)}
+.mtrack.sel{background:var(--sky-lt);color:var(--sky);border-color:var(--sky)}
+
 /* REST BTN */
 .rdr{margin:10px 14px 0}
 .rdb{width:100%;background:var(--sage-lt);color:var(--sage);border:1.5px solid #C3EDD9;border-radius:var(--rsm);padding:11px;font-family:var(--f);font-size:.82rem;font-weight:700;cursor:pointer;transition:all .18s;text-align:center}
@@ -234,6 +256,8 @@ body{font-family:var(--f);background:var(--cream);color:var(--ink);max-width:430
 .serow{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
 .serow:last-child{border-bottom:none}
 .serow:active{background:var(--warm)}
+.serow.no-tap{cursor:default}
+.serow.no-tap:active{background:transparent}
 .serl{display:flex;align-items:center;gap:12px}
 .seic{font-size:1.2rem;width:28px;text-align:center}
 .selb{font-size:.9rem;font-weight:700;color:var(--ink)}
@@ -253,6 +277,14 @@ body{font-family:var(--f);background:var(--cream);color:var(--ink);max-width:430
 .dngr{display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;transition:background .15s}
 .dngr:active{background:#FFF0EE}
 .dngl{font-size:.9rem;font-weight:700;color:var(--coral)}
+
+/* TOGGLE SWITCH */
+.sw-lbl{position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0;cursor:pointer}
+.sw-lbl input{opacity:0;width:0;height:0;position:absolute}
+.sw-sl{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:26px;transition:background .2s}
+.sw-sl::before{content:'';position:absolute;height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.sw-lbl input:checked + .sw-sl{background:var(--sage)}
+.sw-lbl input:checked + .sw-sl::before{transform:translateX(20px)}
 
 /* MODAL */
 .mo{position:fixed;inset:0;background:rgba(30,26,20,.5);z-index:300;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s;max-width:430px;margin:0 auto}
@@ -368,6 +400,22 @@ body{font-family:var(--f);background:var(--cream);color:var(--ink);max-width:430
         <div class="cbps" id="cbPs"></div>
       </div>
 
+      <!-- MUSIC SECTION -->
+      <div class="mus-sec">
+        <div class="mus-hdr">
+          <span class="mus-lbl">🎵 Music</span>
+          <div class="mus-ctrls">
+            <button class="mus-btn" id="musLoopBtn" onclick="togMusicLoop()" title="Toggle loop">↺ Loop</button>
+            <button class="mus-power" id="musPowerBtn" onclick="togMusic()">♪ Off</button>
+          </div>
+        </div>
+        <div class="mus-tracks">
+          <button class="mtrack sel" data-track="lofi" onclick="selTrack('lofi')">Lo-fi</button>
+          <button class="mtrack" data-track="rain" onclick="selTrack('rain')">Rain</button>
+          <button class="mtrack" data-track="nature" onclick="selTrack('nature')">Nature</button>
+        </div>
+      </div>
+
       <div class="rdr"><button class="rdb" id="rdBtn" onclick="togRest()">🌿 Rest Day</button></div>
     </div>
   </div>
@@ -422,13 +470,25 @@ body{font-family:var(--f);background:var(--cream);color:var(--ink);max-width:430
           <div class="rdg" id="rdPills"></div>
         </div>
       </div>
+
+      <!-- SOUND SETTINGS -->
+      <div class="sec" style="margin-top:10px">
+        <div class="serow no-tap">
+          <div class="serl"><span class="seic">🔊</span><span class="selb">Sound Effects</span></div>
+          <label class="sw-lbl">
+            <input type="checkbox" id="sfxToggle" onchange="togSfx(this)">
+            <span class="sw-sl"></span>
+          </label>
+        </div>
+      </div>
+
       <div class="dng">
         <div class="dngr" onclick="showMod()">
           <span class="seic">💔</span>
           <span class="dngl">Release Pet &amp; Reset All Data</span>
         </div>
       </div>
-      <div style="margin:20px 14px;text-align:center;color:var(--ink-faint);font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase">Focus Pet · v2.0</div>
+      <div style="margin:20px 14px;text-align:center;color:var(--ink-faint);font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase">Focus Pet · v2.1</div>
     </div>
   </div>
 
@@ -466,534 +526,780 @@ body{font-family:var(--f);background:var(--cream);color:var(--ink);max-width:430
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── CONSTANTS ── */
-const POMO=25*60,BRK=5*60,CIRC=534.07;
-const EXP_S=20,EXP_L=100;
+/* ════════════════════════════════════════
+   CONSTANTS
+════════════════════════════════════════ */
+const POMO=25*60, BRK=5*60, CIRC=534.07;
+const EXP_S=20, EXP_L=100;
 const EMOJIS={cat:'🐱',dog:'🐶',bunny:'🐰'};
 const DS=['SUN','MON','TUE','WED','THU','FRI','SAT'];
 const DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-/* ── STATE ── */
-let pet=null,mode='idle',secsLeft=POMO,tick=null,sessStart=null;
-let comboN=1,comboI=0,onBreak=false,isRest=false,obPet='cat';
-/* ── SOUND + NOTIFICATION ── */
-let audioCtx=null;
-let soundUnlocked=false;
+/* ════════════════════════════════════════
+   TIMER STATE
+════════════════════════════════════════ */
+let pet=null, mode='idle', secsLeft=POMO, tick=null, sessStart=null;
+let comboN=1, comboI=0, onBreak=false, isRest=false, obPet='cat';
+let endTime=null; // absolute timestamp when current segment ends — used for background-accurate tracking
 
-function initAudio(){
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if(!Ctx) return null;
-  if(!audioCtx) audioCtx = new Ctx();
-  return audioCtx;
+/* ════════════════════════════════════════
+   AUDIO SYSTEM
+════════════════════════════════════════ */
+const SFX = {
+  start:    'assets/audio/music/start.mp3',
+  pause:    'assets/audio/music/pause.mp3',
+  stop:     'assets/audio/music/stop.mp3',
+  complete: 'assets/audio/music/complete.mp3',
+  break:    'assets/audio/music/break.mp3',
+  combo:    'assets/audio/music/combo.mp3',
+  exp:      'assets/audio/music/exp.mp3',
+  levelup:  'assets/audio/music/level%20up.mp3',
+};
+const MUSIC_TRACKS = {
+  lofi:   'assets/audio/sfx/lofi.mp3',
+  rain:   'assets/audio/sfx/rain.mp3',
+  nature: 'assets/audio/sfx/Nature%20sounds.mp3',
+};
+
+let sfxEnabled  = true;
+let musicEnabled = false;
+let musicLoop   = true;
+let currentTrack = 'lofi';
+let musicAudio  = null;
+
+function initAudioSettings() {
+  sfxEnabled   = localStorage.getItem('fp_sfx')         !== 'false';
+  musicEnabled = localStorage.getItem('fp_music')        === 'true';  // OFF by default
+  musicLoop    = localStorage.getItem('fp_music_loop')  !== 'false';
+  currentTrack = localStorage.getItem('fp_music_track') || 'lofi';
+  // Sync toggle UI
+  const tog = document.getElementById('sfxToggle');
+  if (tog) tog.checked = sfxEnabled;
 }
 
-function unlockAudio(){
-  const ctx = initAudio();
-  if(!ctx) return;
-  if(ctx.state === 'suspended') ctx.resume();
-  soundUnlocked = true;
+/* Play a one-shot SFX */
+function playSfx(type) {
+  if (!sfxEnabled) return;
+  const src = SFX[type];
+  if (!src) return;
+  try {
+    const a = new Audio(src);
+    a.volume = 0.75;
+    a.play().catch(()=>{});
+  } catch(e) {}
 }
 
-function beep(freq=500, duration=0.1){
-  const ctx = initAudio();
-  if(!ctx || ctx.state === 'suspended') return;
-
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  osc.frequency.value = freq;
-  gain.gain.value = 0.05;
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-
-  osc.start();
-  osc.stop(ctx.currentTime + duration);
+/* ── Music Controls ── */
+function startMusic() {
+  if (!musicEnabled) return;
+  const src = MUSIC_TRACKS[currentTrack];
+  if (!src) return;
+  // Stop existing
+  if (musicAudio) { musicAudio.pause(); musicAudio = null; }
+  musicAudio = new Audio(src);
+  musicAudio.loop = musicLoop;
+  musicAudio.volume = 0.45;
+  musicAudio.play().catch(()=>{});
 }
 
-function playSound(type){
-  switch(type){
-    case 'start':
-      beep(600,0.08);
-      break;
-    case 'pause':
-      beep(400,0.08);
-      break;
-    case 'done':
-      beep(700,0.1);
-      setTimeout(()=>beep(900,0.15),100);
-      break;
-    case 'break':
-      beep(500,0.1);
-      break;
+function stopMusic() {
+  if (musicAudio) {
+    musicAudio.pause();
+    musicAudio.currentTime = 0;
+    musicAudio = null;
   }
 }
 
-/* notification */
-function notify(title, body){
-  if(!("Notification" in window)) return;
-  if(Notification.permission !== "granted") return;
-
-  new Notification(title,{body});
+function pauseMusic() {
+  if (musicAudio && !musicAudio.paused) musicAudio.pause();
 }
 
-function requestNoti(){
-  if("Notification" in window && Notification.permission==="default"){
+function resumeMusic() {
+  if (!musicEnabled) return;
+  if (musicAudio && musicAudio.paused) {
+    musicAudio.play().catch(()=>{});
+  } else if (!musicAudio) {
+    startMusic();
+  }
+}
+
+function togMusic() {
+  musicEnabled = !musicEnabled;
+  localStorage.setItem('fp_music', musicEnabled);
+  if (musicEnabled && mode === 'running' && !onBreak) {
+    startMusic();
+  } else {
+    stopMusic();
+  }
+  renderMusicUI();
+}
+
+function togMusicLoop() {
+  musicLoop = !musicLoop;
+  localStorage.setItem('fp_music_loop', musicLoop);
+  if (musicAudio) musicAudio.loop = musicLoop;
+  renderMusicUI();
+}
+
+function selTrack(track) {
+  currentTrack = track;
+  localStorage.setItem('fp_music_track', track);
+  if (musicEnabled && mode === 'running' && !onBreak) {
+    startMusic(); // restart with new track
+  }
+  renderMusicUI();
+}
+
+function togSfx(el) {
+  sfxEnabled = el.checked;
+  localStorage.setItem('fp_sfx', sfxEnabled);
+}
+
+function renderMusicUI() {
+  const powerBtn = document.getElementById('musPowerBtn');
+  const loopBtn  = document.getElementById('musLoopBtn');
+  if (powerBtn) {
+    powerBtn.textContent = musicEnabled ? '♪ On' : '♪ Off';
+    powerBtn.classList.toggle('on', musicEnabled);
+  }
+  if (loopBtn) loopBtn.classList.toggle('active', musicLoop);
+  document.querySelectorAll('.mtrack').forEach(b => {
+    b.classList.toggle('sel', b.dataset.track === currentTrack);
+  });
+}
+
+/* ════════════════════════════════════════
+   NOTIFICATION
+════════════════════════════════════════ */
+function notify(title, body) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  new Notification(title, {body});
+}
+function requestNoti() {
+  if ('Notification' in window && Notification.permission === 'default')
     Notification.requestPermission();
+}
+
+/* ════════════════════════════════════════
+   STORAGE HELPERS
+════════════════════════════════════════ */
+const S = {
+  g: k => { try { return JSON.parse(localStorage.getItem(k)) } catch { return null } },
+  s: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
+  d: k => localStorage.removeItem(k),
+};
+const todayStr = () => new Date().toISOString().slice(0,10);
+const dKey     = d => `fp_d_${d}`;
+const todayD   = () => S.g(dKey(todayStr())) || {sessions:[], restDay:false};
+const saveD    = d => S.s(dKey(todayStr()), d);
+const getDM    = ds => (S.g(dKey(ds)) || {sessions:[]}).sessions.reduce((a,s) => a+(s.duration||0), 0);
+
+/* ════════════════════════════════════════
+   PET
+════════════════════════════════════════ */
+const savePet  = () => S.s('fp_pet', pet);
+const pEmoji   = () => EMOJIS[pet.type] || '🐱';
+
+function addExp(n) {
+  pet.exp += n;
+  let lv = false;
+  while (pet.exp >= EXP_L) { pet.exp -= EXP_L; pet.level++; lv = true; }
+  savePet();
+  if (lv) {
+    showLv(); // showLv plays levelup sound
+  } else {
+    playSfx('exp');
   }
 }
-/* ── STORAGE ── */
-const S={g:k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}},s:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),d:k=>localStorage.removeItem(k)};
-const todayStr=()=>new Date().toISOString().slice(0,10);
-const dKey=d=>`fp_d_${d}`;
-const todayD=()=>S.g(dKey(todayStr()))||{sessions:[],restDay:false};
-const saveD=d=>S.s(dKey(todayStr()),d);
-const getDM=ds=>(S.g(dKey(ds))||{sessions:[]}).sessions.reduce((a,s)=>a+(s.duration||0),0);
 
-/* ── PET ── */
-const savePet=()=>S.s('fp_pet',pet);
-const pEmoji=()=>EMOJIS[pet.type]||'🐱';
-function addExp(n){
-  pet.exp+=n;let lv=false;
-  while(pet.exp>=EXP_L){pet.exp-=EXP_L;pet.level++;lv=true}
-  savePet();if(lv)showLv();
-}
-function petState(){
-  if(mode==='running'&&!onBreak)return'focus';
-  if(onBreak||mode==='break')return'break';
-  const d=todayD();
-  if(d.restDay)return'rest';
-  const m=getDM(todayStr());
-  if(m===0)return'rest';
-  if(m<60)return'tired';
-  if(m<120)return'low';
-  if(m<180)return'good';
-  if(m<=240)return'strong';
-  return'peak';
-}
-const SMSG={rest:'Rest day today... 😴',tired:'I feel distracted today… 😞',low:'We tried, but we can do better 🙂',good:'Nice focus today 🔥',strong:"We're doing great! 😎",peak:'We were unstoppable today 🚀',focus:"I'm focusing with you... 💪",break:"Taking a little break 🍃"};
-const SCHP={rest:['Rest','c-rest'],tired:['Tired','c-tired'],low:['Low Energy','c-low'],good:['Good','c-good'],strong:['Strong','c-strong'],peak:['Peak','c-peak'],focus:['Focusing','c-focus'],break:['Break','c-break']};
-
-/* ── ONBOARD ── */
-function selPet(el,type,em){
-  document.querySelectorAll('.pp').forEach(e=>e.classList.remove('sel'));
-  el.classList.add('sel');obPet=type;
-  document.getElementById('ob-prev').textContent=em;chkOb();
-}
-function chkOb(){document.getElementById('ob-btn').disabled=!document.getElementById('ob-nm').value.trim()}
-function doOnboard(){
-  const n=document.getElementById('ob-nm').value.trim();if(!n)return;
-  pet={type:obPet,name:n,exp:0,level:1};savePet();
-  S.s('fp_ob',true);boot2();
+function petState() {
+  if (mode==='running' && !onBreak) return 'focus';
+  if (onBreak || mode==='break') return 'break';
+  const d = todayD();
+  if (d.restDay) return 'rest';
+  const m = getDM(todayStr());
+  if (m===0)   return 'rest';
+  if (m<60)    return 'tired';
+  if (m<120)   return 'low';
+  if (m<180)   return 'good';
+  if (m<=240)  return 'strong';
+  return 'peak';
 }
 
-/* ── BOOT ── */
-function boot(){
-  pet=S.g('fp_pet');
-  if(!S.g('fp_ob')||!pet){document.getElementById('ob').style.display='flex';document.getElementById('app').style.display='none'}
-  else boot2();
-}
-function boot2(){
-  document.getElementById('ob').style.display='none';
-  document.getElementById('app').style.display='flex';
-  chkReset();isRest=todayD().restDay||false;
-  chkPresetRest();buildCombo();buildRdPills();renderAll();
-}
-function chkReset(){
-  const last=S.g('fp_last'),today=todayStr();
-  if(last&&last!==today)updStreak(last,today);
-  S.s('fp_last',today);
-}
-function updStreak(last,today){
-  const yd=new Date(today);yd.setDate(yd.getDate()-1);
-  const yds=yd.toISOString().slice(0,10);
-  const lm=getDM(last);const lr=(S.g(dKey(last))||{}).restDay;
-  let sk=S.g('fp_sk')||0;
-  if((lm>0||lr)&&last>=yds)sk++;else if(!lr&&lm===0)sk=0;
-  S.s('fp_sk',sk);
-}
-const getStreak=()=>S.g('fp_sk')||0;
+const SMSG = {
+  rest: 'Rest day today... 😴', tired: 'I feel distracted today… 😞',
+  low: 'We tried, but we can do better 🙂', good: 'Nice focus today 🔥',
+  strong: "We're doing great! 😎", peak: 'We were unstoppable today 🚀',
+  focus: "I'm focusing with you... 💪", break: 'Taking a little break 🍃'
+};
+const SCHP = {
+  rest:['Rest','c-rest'], tired:['Tired','c-tired'], low:['Low Energy','c-low'],
+  good:['Good','c-good'], strong:['Strong','c-strong'], peak:['Peak','c-peak'],
+  focus:['Focusing','c-focus'], break:['Break','c-break']
+};
 
-/* ── TIMER ── */
+/* ════════════════════════════════════════
+   ONBOARDING
+════════════════════════════════════════ */
+function selPet(el, type, em) {
+  document.querySelectorAll('.pp').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel'); obPet = type;
+  document.getElementById('ob-prev').textContent = em; chkOb();
+}
+function chkOb() { document.getElementById('ob-btn').disabled = !document.getElementById('ob-nm').value.trim(); }
+function doOnboard() {
+  const n = document.getElementById('ob-nm').value.trim(); if (!n) return;
+  pet = {type:obPet, name:n, exp:0, level:1}; savePet();
+  S.s('fp_ob', true); boot2();
+}
 
-  function startSess(){
-  unlockAudio();
-  playSound('start');
+/* ════════════════════════════════════════
+   BOOT
+════════════════════════════════════════ */
+function boot() {
+  pet = S.g('fp_pet');
+  if (!S.g('fp_ob') || !pet) {
+    document.getElementById('ob').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  } else { boot2(); }
+}
 
-  if(isRest){
-    toastMsg('Rest day active! Cancel it first.');
-    return;
+function boot2() {
+  document.getElementById('ob').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initAudioSettings();
+  chkReset();
+  isRest = todayD().restDay || false;
+  chkPresetRest();
+  buildCombo();
+  buildRdPills();
+  restoreSession();  // resume if app was backgrounded mid-session
+  renderAll();
+  requestNoti();
+}
+
+function chkReset() {
+  const last = S.g('fp_last'), today = todayStr();
+  if (last && last !== today) updStreak(last, today);
+  S.s('fp_last', today);
+}
+
+function updStreak(last, today) {
+  const yd = new Date(today); yd.setDate(yd.getDate()-1);
+  const yds = yd.toISOString().slice(0,10);
+  const lm = getDM(last); const lr = (S.g(dKey(last))||{}).restDay;
+  let sk = S.g('fp_sk') || 0;
+  if ((lm>0||lr) && last>=yds) sk++; else if (!lr && lm===0) sk = 0;
+  S.s('fp_sk', sk);
+}
+const getStreak = () => S.g('fp_sk') || 0;
+
+/* ════════════════════════════════════════
+   BACKGROUND SESSION RESTORE
+════════════════════════════════════════ */
+function saveTimerState() {
+  if (mode === 'running' && endTime) {
+    S.s('fp_timer', { endTime, onBreak, comboN, comboI,
+      sessStart: sessStart ? sessStart.toISOString() : new Date().toISOString() });
+  } else {
+    S.d('fp_timer');
   }
-
-  comboI=0;
-  secsLeft=POMO;
-  onBreak=false;
-  mode='running';
-  sessStart=new Date();
-  clearInterval(tick);
-  tick=setInterval(doTick,1000);
-
-  renderTimer();
-  renderPet();
 }
 
-function pauseSess(){
-  if(mode!=='running') return;
-
-  playSound('pause');
-  mode='paused';
-  clearInterval(tick);
-  renderTimer();
-}
-
-function contSess(){
-  if(mode!=='paused') return;
-
-  unlockAudio();
-  playSound('start');
-  mode='running';
-  tick=setInterval(doTick,1000);
-
-  renderTimer();
-  renderPet();
-}
-
-function stopSess(){
-  if(mode==='idle'||mode==='done') return;
-
-  playSound('pause');
-  clearInterval(tick);
-
-  if(!onBreak){
-    const e=Math.round((POMO-secsLeft)/60);
-    if(e>0){
-      saveSess(e,false);
-      toastMsg(`Saved ${e} min ✓`);
-    }
-  }
-
-  mode='idle';
-  secsLeft=POMO;
-  comboI=0;
-  onBreak=false;
-  sessStart=null;
-
-  renderTimer();
-  renderPet();
-  renderQS();
-  renderStats();
-}
-
-function restartSess(){
-  playSound('start');
-  clearInterval(tick);
-
-  if(!onBreak){
-    const e=Math.round((POMO-secsLeft)/60);
-    if(e>0) saveSess(e,false);
-  }
-
-  comboI=0;
-  secsLeft=POMO;
-  onBreak=false;
-  mode='running';
-  sessStart=new Date();
-  tick=setInterval(doTick,1000);
-
-  renderTimer();
-  renderPet();
-}
-
-function skipBreak(){
-  playSound('break');
-  clearInterval(tick);
-
-  onBreak=false;
-  comboI++;
-  secsLeft=POMO;
-  mode='running';
-  sessStart=new Date();
-  tick=setInterval(doTick,1000);
-
-  renderTimer();
-  renderPet();
-}
-
-function doTick(){
-  if(secsLeft>0){
-    secsLeft--;
-    renderTimerFace();
-    return;
-  }
-
-  if(!onBreak){
+function restoreSession() {
+  const saved = S.g('fp_timer');
+  if (!saved) return;
+  const remaining = Math.round((saved.endTime - Date.now()) / 1000);
+  if (remaining > 10) {
+    secsLeft   = remaining;
+    endTime    = saved.endTime;
+    mode       = 'running';
+    onBreak    = saved.onBreak;
+    comboN     = saved.comboN || 1;
+    comboI     = saved.comboI || 0;
+    sessStart  = new Date(saved.sessStart);
     clearInterval(tick);
-    saveSess(25,true);
-    addExp(EXP_S);
+    tick = setInterval(doTick, 1000);
+    toastMsg('Session resumed ⏱');
+  } else {
+    S.d('fp_timer'); // expired while away
+  }
+}
 
-    renderPet();
-    renderQS();
-    renderStats();
-    renderAwards();
+/* ════════════════════════════════════════
+   TIMER
+════════════════════════════════════════ */
+function startSess() {
+  if (isRest) { toastMsg('Rest day active! Cancel it first.'); return; }
+  comboI   = 0;
+  secsLeft = POMO;
+  onBreak  = false;
+  mode     = 'running';
+  sessStart = new Date();
+  endTime  = Date.now() + POMO * 1000;
+  clearInterval(tick);
+  tick = setInterval(doTick, 1000);
+  playSfx('start');
+  startMusic();
+  saveTimerState();
+  renderTimer(); renderPet();
+}
 
-    if(comboI<comboN-1){
-      onBreak=true;
-      secsLeft=BRK;
-      mode='break';
-      tick=setInterval(doTick,1000);
+function pauseSess() {
+  if (mode !== 'running') return;
+  mode = 'paused';
+  clearInterval(tick);
+  endTime = null; // keep secsLeft as-is for resume
+  playSfx('pause');
+  pauseMusic();
+  S.d('fp_timer'); // no longer running
+  renderTimer();
+}
 
-      playSound('break');
-      notify('Break time','Take a short break 🍃');
+function contSess() {
+  if (mode !== 'paused') return;
+  mode    = 'running';
+  endTime = Date.now() + secsLeft * 1000;
+  tick    = setInterval(doTick, 1000);
+  playSfx('start');
+  resumeMusic();
+  saveTimerState();
+  renderTimer(); renderPet();
+}
 
+function stopSess() {
+  if (mode === 'idle' || mode === 'done') return;
+  clearInterval(tick);
+  if (!onBreak) {
+    const e = Math.round((POMO - secsLeft) / 60);
+    if (e > 0) { saveSess(e, false); toastMsg(`Saved ${e} min ✓`); }
+  }
+  mode     = 'idle';
+  secsLeft = POMO;
+  comboI   = 0;
+  onBreak  = false;
+  sessStart = null;
+  endTime  = null;
+  playSfx('stop');
+  stopMusic();
+  S.d('fp_timer');
+  renderTimer(); renderPet(); renderQS(); renderStats();
+}
+
+function restartSess() {
+  clearInterval(tick);
+  if (!onBreak) {
+    const e = Math.round((POMO - secsLeft) / 60);
+    if (e > 0) saveSess(e, false);
+  }
+  comboI   = 0;
+  secsLeft = POMO;
+  onBreak  = false;
+  mode     = 'running';
+  sessStart = new Date();
+  endTime  = Date.now() + POMO * 1000;
+  tick     = setInterval(doTick, 1000);
+  playSfx('start');
+  startMusic();
+  saveTimerState();
+  renderTimer(); renderPet();
+}
+
+function skipBreak() {
+  clearInterval(tick);
+  onBreak  = false;
+  comboI++;
+  secsLeft = POMO;
+  mode     = 'running';
+  sessStart = new Date();
+  endTime  = Date.now() + POMO * 1000;
+  tick     = setInterval(doTick, 1000);
+  playSfx('start');
+  startMusic();
+  saveTimerState();
+  renderTimer(); renderPet();
+}
+
+function doTick() {
+  if (mode !== 'running' && mode !== 'break') return; // safety guard
+  // Calculate from absolute endTime for accuracy across backgrounding
+  if (endTime) {
+    secsLeft = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+  } else {
+    secsLeft = Math.max(0, secsLeft - 1);
+  }
+
+  if (secsLeft > 0) { renderTimerFace(); return; }
+
+  // ── Segment ended ──
+  if (!onBreak) {
+    clearInterval(tick);
+    saveSess(25, true);
+    renderPet(); renderQS(); renderStats(); renderAwards();
+
+    if (comboI < comboN - 1) {
+      // Start break
+      onBreak  = true;
+      secsLeft = BRK;
+      mode     = 'break';
+      endTime  = Date.now() + BRK * 1000;
+      tick     = setInterval(doTick, 1000);
+      playSfx('break');
+      stopMusic(); // no music during break
+      notify('Break time', 'Take a short break 🍃');
       toastMsg(`Session ${comboI+1}/${comboN} done! Break 🍃`);
+      S.d('fp_timer'); // break doesn't need restore
       renderTimer();
+      addExp(EXP_S);
     } else {
-      mode='done';
-      secsLeft=0;
-      comboI=0;
-
-      playSound('done');
-      notify('Session completed','Good job! Your pet is happy 🐱');
-
-      toastMsg(comboN>1 ? `Combo ${comboN}× complete! 🎉` : 'Session complete! 🎉');
+      // All done
+      mode     = 'done';
+      secsLeft = 0;
+      endTime  = null;
+      comboI   = 0;
+      playSfx('complete');
+      stopMusic();
+      notify('Session completed', 'Good job! Your pet is happy 🐱');
+      toastMsg(comboN > 1 ? `Combo ${comboN}× complete! 🎉` : 'Session complete! 🎉');
+      S.d('fp_timer');
       renderTimer();
+      addExp(EXP_S); // plays exp or levelup sound
     }
   } else {
-    onBreak=false;
+    // Break ended → next session
+    clearInterval(tick);
+    onBreak  = false;
     comboI++;
-    secsLeft=POMO;
-    mode='running';
-    sessStart=new Date();
-
-    playSound('start');
+    secsLeft = POMO;
+    mode     = 'running';
+    sessStart = new Date();
+    endTime  = Date.now() + POMO * 1000;
+    tick     = setInterval(doTick, 1000);
+    playSfx('start');
+    startMusic();
     toastMsg(`Session ${comboI+1}/${comboN} 🚀`);
-
-    renderTimer();
-    renderPet();
+    saveTimerState();
+    renderTimer(); renderPet();
   }
 }
 
-/* ── SESSION SAVE ── */
-function saveSess(dur,done){
-  const d=todayD();
-  d.sessions.push({start:sessStart?sessStart.toISOString():new Date().toISOString(),end:new Date().toISOString(),duration:dur,completed:done});
-  saveD(d);sessStart=new Date();
+/* ════════════════════════════════════════
+   SESSION SAVE
+════════════════════════════════════════ */
+function saveSess(dur, done) {
+  const d = todayD();
+  d.sessions.push({
+    start: sessStart ? sessStart.toISOString() : new Date().toISOString(),
+    end: new Date().toISOString(),
+    duration: dur,
+    completed: done
+  });
+  saveD(d); sessStart = new Date();
 }
 
-/* ── REST ── */
-function togRest(){
-  if(mode!=='idle'&&mode!=='done'){toastMsg('Stop the timer first!');return}
-  isRest=!isRest;const d=todayD();d.restDay=isRest;saveD(d);
-  renderRestBanner();renderPet();toastMsg(isRest?'🌿 Rest day set!':'Rest day cancelled');
+/* ════════════════════════════════════════
+   REST
+════════════════════════════════════════ */
+function togRest() {
+  if (mode !== 'idle' && mode !== 'done') { toastMsg('Stop the timer first!'); return; }
+  isRest = !isRest; const d = todayD(); d.restDay = isRest; saveD(d);
+  renderRestBanner(); renderPet();
+  toastMsg(isRest ? '🌿 Rest day set!' : 'Rest day cancelled');
 }
-function cancelRest(){isRest=false;const d=todayD();d.restDay=false;saveD(d);renderRestBanner();renderPet()}
-function renderRestBanner(){
-  const b=document.getElementById('rdBtn'),bn=document.getElementById('rbann');
-  if(isRest){b.classList.add('on');b.textContent='🌿 Rest Day Active';bn.style.display='flex'}
-  else{b.classList.remove('on');b.textContent='🌿 Rest Day';bn.style.display='none'}
+function cancelRest() {
+  isRest = false; const d = todayD(); d.restDay = false; saveD(d);
+  renderRestBanner(); renderPet();
 }
-function chkPresetRest(){
-  const pd=S.g('fp_rd')||[];const dow=new Date().getDay();
-  if(pd.includes(dow)&&!isRest){isRest=true;const d=todayD();d.restDay=true;saveD(d)}
+function renderRestBanner() {
+  const b = document.getElementById('rdBtn'), bn = document.getElementById('rbann');
+  if (isRest) { b.classList.add('on'); b.textContent = '🌿 Rest Day Active'; bn.style.display = 'flex'; }
+  else { b.classList.remove('on'); b.textContent = '🌿 Rest Day'; bn.style.display = 'none'; }
+}
+function chkPresetRest() {
+  const pd = S.g('fp_rd') || []; const dow = new Date().getDay();
+  if (pd.includes(dow) && !isRest) { isRest = true; const d = todayD(); d.restDay = true; saveD(d); }
   renderRestBanner();
 }
 
-/* ── COMBO ── */
-function buildCombo(){
-  const c=document.getElementById('cbPs');
-  c.innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>`<div class="cp ${n===1?'sel':''}" onclick="selCombo(${n})">${n}×</div>`).join('');
+/* ════════════════════════════════════════
+   COMBO
+════════════════════════════════════════ */
+function buildCombo() {
+  const c = document.getElementById('cbPs');
+  c.innerHTML = [1,2,3,4,5,6,7,8,9,10].map(n =>
+    `<div class="cp ${n===1?'sel':''}" onclick="selCombo(${n})">${n}×</div>`
+  ).join('');
 }
-function selCombo(n){
-  if(mode!=='idle'&&mode!=='done'){toastMsg('Stop current session first');return}
-  comboN=n;comboI=0;
-  document.querySelectorAll('.cp').forEach(p=>p.classList.toggle('sel',+p.textContent.replace('×','')==n));
+function selCombo(n) {
+  if (mode !== 'idle' && mode !== 'done') { toastMsg('Stop current session first'); return; }
+  comboN = n; comboI = 0;
+  document.querySelectorAll('.cp').forEach(p =>
+    p.classList.toggle('sel', +p.textContent.replace('×','') === n)
+  );
+  playSfx('combo');
   renderTimer();
 }
 
-/* ── RENDER ALL ── */
-function renderAll(){renderPet();renderTimer();renderQS();renderRestBanner();renderStats();renderAwards();renderSettings()}
+/* ════════════════════════════════════════
+   RENDER ALL
+════════════════════════════════════════ */
+function renderAll() {
+  renderPet(); renderTimer(); renderQS(); renderRestBanner();
+  renderStats(); renderAwards(); renderSettings(); renderMusicUI();
+}
 
 /* PET */
-function renderPet(){
-  if(!pet)return;
-  const st=petState();const[cl,cc]=SCHP[st]||['?','c-rest'];
-  const em=pEmoji();const pct=Math.min(100,(pet.exp/EXP_L)*100);
-  document.getElementById('paEmoji').textContent=em;
-  document.getElementById('paEmoji').className=`pa s-${st}`;
-  document.getElementById('pName').textContent=pet.name;
-  document.getElementById('pLv').textContent=`Lv.${pet.level}`;
-  document.getElementById('pChip').textContent=cl;
-  document.getElementById('pChip').className=`psc ${cc}`;
-  document.getElementById('pMsg').textContent=SMSG[st]||'';
-  document.getElementById('pExpFill').style.width=pct+'%';
-  document.getElementById('pExpLbl').textContent=`${pet.exp} / ${EXP_L}`;
-  const bgs={focus:['#FF6B5B18','#FFB84018'],peak:['#9B7FD418','#5BA88718'],strong:['#4A90D918','#5BA88718'],good:['#5BA88718','#FFB84018'],low:['#F5A62318','#5BA88718'],tired:['#FF6B5B14','#F5A62314'],rest:['#8A807018','#C4BAA818'],break:['#5BA88718','#4A90D918']};
-  const b=bgs[st]||bgs.rest;
-  const bg=document.getElementById('pcbg');
-  bg.style.setProperty('--b1',b[0]);bg.style.setProperty('--b2',b[1]);
+function renderPet() {
+  if (!pet) return;
+  const st = petState(); const [cl, cc] = SCHP[st] || ['?','c-rest'];
+  const em = pEmoji(); const pct = Math.min(100, (pet.exp / EXP_L) * 100);
+  document.getElementById('paEmoji').textContent = em;
+  document.getElementById('paEmoji').className   = `pa s-${st}`;
+  document.getElementById('pName').textContent   = pet.name;
+  document.getElementById('pLv').textContent     = `Lv.${pet.level}`;
+  document.getElementById('pChip').textContent   = cl;
+  document.getElementById('pChip').className     = `psc ${cc}`;
+  document.getElementById('pMsg').textContent    = SMSG[st] || '';
+  document.getElementById('pExpFill').style.width = pct + '%';
+  document.getElementById('pExpLbl').textContent  = `${pet.exp} / ${EXP_L}`;
+  const bgs = {
+    focus:['#FF6B5B18','#FFB84018'], peak:['#9B7FD418','#5BA88718'],
+    strong:['#4A90D918','#5BA88718'], good:['#5BA88718','#FFB84018'],
+    low:['#F5A62318','#5BA88718'], tired:['#FF6B5B14','#F5A62314'],
+    rest:['#8A807018','#C4BAA818'], break:['#5BA88718','#4A90D918']
+  };
+  const b = bgs[st] || bgs.rest;
+  const bg = document.getElementById('pcbg');
+  bg.style.setProperty('--b1', b[0]); bg.style.setProperty('--b2', b[1]);
 }
 
 /* TIMER */
-function renderTimer(){renderTimerFace();renderTimerBtns();renderComboDots();renderComboHdr()}
-function renderTimerFace(){
-  const tot=onBreak?BRK:POMO;const pct=secsLeft/tot;
-  const off=CIRC*(1-pct);const f=document.getElementById('rFill');
-  f.style.strokeDashoffset=off;
-  f.className='rf'+(onBreak?' bm':'')+(mode==='paused'?' pm':'');
-  const m=Math.floor(secsLeft/60),s=secsLeft%60;
-  document.getElementById('rTime').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  const md=document.getElementById('rMode');
-  if(mode==='running'){md.textContent=onBreak?'Break':'Focusing';md.className=onBreak?'rmd brk':'rmd run'}
-  else if(mode==='paused'){md.textContent='Paused';md.className='rmd'}
-  else if(mode==='done'){md.textContent='Done! 🎉';md.className='rmd dn'}
-  else{md.textContent='Ready';md.className='rmd'}
-  const po=document.getElementById('pOuter');
-  if(mode==='running'){po.classList.add('on');po.style.borderColor=onBreak?'var(--sage)':'var(--coral)'}
+function renderTimer() { renderTimerFace(); renderTimerBtns(); renderComboDots(); renderComboHdr(); }
+function renderTimerFace() {
+  const tot = onBreak ? BRK : POMO; const pct = secsLeft / tot;
+  const off = CIRC * (1-pct); const f = document.getElementById('rFill');
+  f.style.strokeDashoffset = off;
+  f.className = 'rf' + (onBreak ? ' bm' : '') + (mode === 'paused' ? ' pm' : '');
+  const m = Math.floor(secsLeft/60), s = secsLeft % 60;
+  document.getElementById('rTime').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  const md = document.getElementById('rMode');
+  if (mode==='running') { md.textContent = onBreak ? 'Break' : 'Focusing'; md.className = onBreak ? 'rmd brk' : 'rmd run'; }
+  else if (mode==='paused') { md.textContent = 'Paused'; md.className = 'rmd'; }
+  else if (mode==='done')   { md.textContent = 'Done! 🎉'; md.className = 'rmd dn'; }
+  else                      { md.textContent = 'Ready';    md.className = 'rmd'; }
+  const po = document.getElementById('pOuter');
+  if (mode === 'running') { po.classList.add('on'); po.style.borderColor = onBreak ? 'var(--sage)' : 'var(--coral)'; }
   else po.classList.remove('on');
 }
-function renderTimerBtns(){
-  const c=document.getElementById('tBtns'),dis=isRest;
-  if(mode==='idle'||mode==='done')
-    c.innerHTML=`<button class="tb tb-p" onclick="startSess()" ${dis?'disabled':''}>▶ Start${comboN>1?' Combo':''}</button>`;
-  else if(mode==='running')
-    c.innerHTML=`<button class="tb tb-s" onclick="pauseSess()">⏸ Pause</button><button class="tb tb-x" onclick="stopSess()">■ Stop</button><button class="tb tb-m" onclick="restartSess()">↺</button>`;
-  else if(mode==='paused')
-    c.innerHTML=`<button class="tb tb-g" onclick="contSess()">▶ Continue</button><button class="tb tb-x" onclick="stopSess()">■ Stop</button><button class="tb tb-m" onclick="restartSess()">↺</button>`;
-  else if(mode==='break')
-    c.innerHTML=`<button class="tb tb-a" onclick="skipBreak()">⏭ Skip Break</button><button class="tb tb-x" onclick="stopSess()">■ Stop</button>`;
+function renderTimerBtns() {
+  const c = document.getElementById('tBtns'), dis = isRest;
+  if (mode === 'idle' || mode === 'done')
+    c.innerHTML = `<button class="tb tb-p" onclick="startSess()" ${dis?'disabled':''}>▶ Start${comboN>1?' Combo':''}</button>`;
+  else if (mode === 'running')
+    c.innerHTML = `<button class="tb tb-s" onclick="pauseSess()">⏸ Pause</button><button class="tb tb-x" onclick="stopSess()">■ Stop</button><button class="tb tb-m" onclick="restartSess()">↺</button>`;
+  else if (mode === 'paused')
+    c.innerHTML = `<button class="tb tb-g" onclick="contSess()">▶ Continue</button><button class="tb tb-x" onclick="stopSess()">■ Stop</button><button class="tb tb-m" onclick="restartSess()">↺</button>`;
+  else if (mode === 'break')
+    c.innerHTML = `<button class="tb tb-a" onclick="skipBreak()">⏭ Skip Break</button><button class="tb tb-x" onclick="stopSess()">■ Stop</button>`;
 }
-function renderComboHdr(){
-  const l=document.getElementById('tcLbl'),b=document.getElementById('cbdg');
-  if(mode!=='idle'&&mode!=='done'&&comboN>1){
-    l.textContent=onBreak?'Break Time':`Session ${comboI+1} of ${comboN}`;
-    b.textContent=`${comboI+1}/${comboN}`;b.style.display='block';
-    b.className=onBreak?'cbdg br':'cbdg';
-  } else if(comboN>1){
-    l.textContent='Focus Timer';b.textContent=`${comboN}× Combo`;b.style.display='block';b.className='cbdg';
-  } else {l.textContent='Focus Timer';b.style.display='none'}
+function renderComboHdr() {
+  const l = document.getElementById('tcLbl'), b = document.getElementById('cbdg');
+  if (mode !== 'idle' && mode !== 'done' && comboN > 1) {
+    l.textContent = onBreak ? 'Break Time' : `Session ${comboI+1} of ${comboN}`;
+    b.textContent = `${comboI+1}/${comboN}`; b.style.display = 'block';
+    b.className = onBreak ? 'cbdg br' : 'cbdg';
+  } else if (comboN > 1) {
+    l.textContent = 'Focus Timer'; b.textContent = `${comboN}× Combo`; b.style.display = 'block'; b.className = 'cbdg';
+  } else { l.textContent = 'Focus Timer'; b.style.display = 'none'; }
 }
-function renderComboDots(){
-  const w=document.getElementById('cDots');
-  if(comboN<=1){w.style.display='none';return}
-  w.style.display='flex';let h='';
-  for(let i=0;i<comboN;i++){
-    if(i>0){const ld=i<=comboI&&!onBreak;h+=`<div class="cl ${ld?'dn':''}"></div>`}
-    if(mode==='idle'||mode==='done')h+=`<div class="cd ${mode==='done'?'dn':''}"></div>`;
-    else if(i<comboI)h+=`<div class="cd dn"></div>`;
-    else if(i===comboI)h+=`<div class="cd ${onBreak?'bk':'cur'}"></div>`;
-    else h+=`<div class="cd"></div>`;
+function renderComboDots() {
+  const w = document.getElementById('cDots');
+  if (comboN <= 1) { w.style.display = 'none'; return; }
+  w.style.display = 'flex'; let h = '';
+  for (let i = 0; i < comboN; i++) {
+    if (i > 0) { const ld = i <= comboI && !onBreak; h += `<div class="cl ${ld?'dn':''}"></div>`; }
+    if (mode === 'idle' || mode === 'done') h += `<div class="cd ${mode==='done'?'dn':''}"></div>`;
+    else if (i < comboI)  h += `<div class="cd dn"></div>`;
+    else if (i === comboI) h += `<div class="cd ${onBreak?'bk':'cur'}"></div>`;
+    else h += `<div class="cd"></div>`;
   }
-  w.innerHTML=h;
+  w.innerHTML = h;
 }
 
 /* QUICK STATS */
-function renderQS(){
-  const d=todayD();const m=d.sessions.reduce((a,s)=>a+(s.duration||0),0);
-  document.getElementById('qs-m').textContent=m;
-  document.getElementById('qs-s').textContent=d.sessions.length;
-  document.getElementById('qs-k').textContent=getStreak();
+function renderQS() {
+  const d = todayD(); const m = d.sessions.reduce((a,s) => a+(s.duration||0), 0);
+  document.getElementById('qs-m').textContent = m;
+  document.getElementById('qs-s').textContent = d.sessions.length;
+  document.getElementById('qs-k').textContent = getStreak();
 }
 
 /* STATS TAB */
-function renderStats(){
-  const d=todayD();const tm=d.sessions.reduce((a,s)=>a+(s.duration||0),0);
-  document.getElementById('st-m').textContent=tm;
-  document.getElementById('st-s').textContent=d.sessions.length;
+function renderStats() {
+  const d = todayD(); const tm = d.sessions.reduce((a,s) => a+(s.duration||0), 0);
+  document.getElementById('st-m').textContent = tm;
+  document.getElementById('st-s').textContent = d.sessions.length;
   // weekly
-  const today=new Date();
-  const wd=[];
-  for(let i=6;i>=0;i--){const d2=new Date(today);d2.setDate(today.getDate()-i);const ds=d2.toISOString().slice(0,10);wd.push({day:DS[d2.getDay()],m:getDM(ds),it:i===0})}
-  const mx=Math.max(...wd.map(w=>w.m),30);
-  document.getElementById('wChart').innerHTML=wd.map(w=>`<div class="wcc"><div class="wcbw"><div class="wcb ${w.it?'td':''} ${w.m>0?'hd':''}" style="height:${Math.max(4,(w.m/mx)*100)}%"></div></div><div class="wcd ${w.it?'td':''}">${w.day[0]}</div></div>`).join('');
+  const today = new Date(); const wd = [];
+  for (let i = 6; i >= 0; i--) {
+    const d2 = new Date(today); d2.setDate(today.getDate()-i);
+    const ds = d2.toISOString().slice(0,10);
+    wd.push({day:DS[d2.getDay()], m:getDM(ds), it:i===0});
+  }
+  const mx = Math.max(...wd.map(w => w.m), 30);
+  document.getElementById('wChart').innerHTML = wd.map(w =>
+    `<div class="wcc"><div class="wcbw"><div class="wcb ${w.it?'td':''} ${w.m>0?'hd':''}" style="height:${Math.max(4,(w.m/mx)*100)}%"></div></div><div class="wcd ${w.it?'td':''}">${w.day[0]}</div></div>`
+  ).join('');
   // monthly
-  const now=new Date();let mm=0;
-  for(let i=1;i<=now.getDate();i++)mm+=getDM(new Date(now.getFullYear(),now.getMonth(),i).toISOString().slice(0,10));
-  document.getElementById('st-mh').textContent=(mm/60).toFixed(1)+'h';
-  document.getElementById('st-ma').textContent=Math.round(mm/now.getDate())+'m';
+  const now = new Date(); let mm = 0;
+  for (let i = 1; i <= now.getDate(); i++) {
+    const ds = new Date(now.getFullYear(), now.getMonth(), i).toISOString().slice(0,10);
+    mm += getDM(ds);
+  }
+  document.getElementById('st-mh').textContent = (mm/60).toFixed(1) + 'h';
+  document.getElementById('st-ma').textContent = Math.round(mm / now.getDate()) + 'm';
   // log
-  const sess=[...d.sessions].reverse();const log=document.getElementById('sLog');
-  if(!sess.length)log.innerHTML='<div class="el">No sessions yet today 🌱</div>';
-  else log.innerHTML=sess.map(s=>`<div class="si"><span class="st2">${new Date(s.start).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span><span class="sd">${s.duration} min</span><span class="stg ${s.completed?'':'pt'}">${s.completed?'✓ Full':'Partial'}</span></div>`).join('');
+  const sess = [...d.sessions].reverse(); const log = document.getElementById('sLog');
+  if (!sess.length) log.innerHTML = '<div class="el">No sessions yet today 🌱</div>';
+  else log.innerHTML = sess.map(s =>
+    `<div class="si"><span class="st2">${new Date(s.start).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span><span class="sd">${s.duration} min</span><span class="stg ${s.completed?'':'pt'}">${s.completed?'✓ Full':'Partial'}</span></div>`
+  ).join('');
 }
 
 /* AWARDS */
-const AWDS=[
-  {t:'Focused Beginner',d:'120 min of focus in a day',g:120,ic:'🟢'},
-  {t:'Deep Worker',d:'180 min of focus in a day',g:180,ic:'🔵'},
-  {t:'Focus Master',d:'240 min of focus in a day',g:240,ic:'🔥'},
+const AWDS = [
+  {t:'Focused Beginner', d:'120 min of focus in a day', g:120, ic:'🟢'},
+  {t:'Deep Worker',      d:'180 min of focus in a day', g:180, ic:'🔵'},
+  {t:'Focus Master',     d:'240 min of focus in a day', g:240, ic:'🔥'},
 ];
-function renderAwards(){
-  const m=(todayD().sessions||[]).reduce((a,s)=>a+(s.duration||0),0);
-  const sk=getStreak();
-  document.getElementById('strNum').textContent=sk;
-  document.getElementById('strSub').textContent=sk>0?`${sk} day${sk>1?'s':''} in a row! Keep it up!`:'Focus every day to build your streak!';
-  document.getElementById('awList').innerHTML=AWDS.map(a=>{
-    const e=m>=a.g,p=Math.min(100,Math.round((m/a.g)*100));
+function renderAwards() {
+  const m = (todayD().sessions || []).reduce((a,s) => a+(s.duration||0), 0);
+  const sk = getStreak();
+  document.getElementById('strNum').textContent = sk;
+  document.getElementById('strSub').textContent = sk > 0
+    ? `${sk} day${sk>1?'s':''} in a row! Keep it up!`
+    : 'Focus every day to build your streak!';
+  document.getElementById('awList').innerHTML = AWDS.map(a => {
+    const e = m >= a.g, p = Math.min(100, Math.round((m/a.g)*100));
     return `<div class="awc ${e?'on':''}"><div class="awi">${a.ic}</div><div class="awif"><div class="awt">${a.t}</div><div class="awd">${a.d}</div><div class="aprt"><div class="aprf" style="width:${p}%"></div></div><div class="aprl"><span class="aprt2">${m} / ${a.g} min</span><span class="aprp">${p}%</span></div></div>${e?'<div class="aeb">Earned ✓</div>':''}</div>`;
   }).join('');
 }
 
 /* SETTINGS */
-function renderSettings(){
-  if(!pet)return;
-  document.getElementById('se-nm').textContent=pet.name;
-  document.getElementById('se-tp').textContent=pet.type[0].toUpperCase()+pet.type.slice(1)+' '+pEmoji();
-  const pd=S.g('fp_rd')||[];
-  document.getElementById('se-rd').textContent=pd.length?pd.map(d=>DS[d]).join(', '):'None';
-  document.getElementById('rnInp').value=pet.name;
+function renderSettings() {
+  if (!pet) return;
+  document.getElementById('se-nm').textContent = pet.name;
+  document.getElementById('se-tp').textContent = pet.type[0].toUpperCase() + pet.type.slice(1) + ' ' + pEmoji();
+  const pd = S.g('fp_rd') || [];
+  document.getElementById('se-rd').textContent = pd.length ? pd.map(d => DS[d]).join(', ') : 'None';
+  document.getElementById('rnInp').value = pet.name;
   // pet type picker
-  document.getElementById('ptPicker').innerHTML=Object.entries(EMOJIS).map(([t,e])=>`<div class="ptpo ${pet.type===t?'sel':''}" onclick="chgType('${t}')"><span>${e}</span>${t[0].toUpperCase()+t.slice(1)}</div>`).join('');
+  document.getElementById('ptPicker').innerHTML = Object.entries(EMOJIS).map(([t,e]) =>
+    `<div class="ptpo ${pet.type===t?'sel':''}" onclick="chgType('${t}')"><span>${e}</span>${t[0].toUpperCase()+t.slice(1)}</div>`
+  ).join('');
+  // sound toggle sync
+  const tog = document.getElementById('sfxToggle');
+  if (tog) tog.checked = sfxEnabled;
 }
-function togEdit(id){
-  ['rename','type','restdays'].forEach(k=>{
-    const el=document.getElementById(`ed-${k}`);
-    if(el)el.style.display=k===id&&el.style.display==='none'?'block':'none';
+
+function togEdit(id) {
+  ['rename','type','restdays'].forEach(k => {
+    const el = document.getElementById(`ed-${k}`);
+    if (el) el.style.display = (k===id && el.style.display==='none') ? 'block' : 'none';
   });
 }
-function saveNm(){const v=document.getElementById('rnInp').value.trim();if(!v)return;pet.name=v;savePet();renderPet();renderSettings();document.getElementById('ed-rename').style.display='none';toastMsg('Renamed to '+v+' ✓')}
-function chgType(t){pet.type=t;savePet();renderPet();renderSettings();document.getElementById('ed-type').style.display='none';toastMsg('Pet changed! 🎉')}
-function buildRdPills(){
-  const pd=S.g('fp_rd')||[];
-  document.getElementById('rdPills').innerHTML=DN.map((n,i)=>`<div class="rdp ${pd.includes(i)?'sel':''}" onclick="togRdPreset(${i},this)">${DS[i]}</div>`).join('');
+function saveNm() {
+  const v = document.getElementById('rnInp').value.trim(); if (!v) return;
+  pet.name = v; savePet(); renderPet(); renderSettings();
+  document.getElementById('ed-rename').style.display = 'none';
+  toastMsg('Renamed to ' + v + ' ✓');
 }
-function togRdPreset(dow,el){
-  let pd=S.g('fp_rd')||[];
-  if(pd.includes(dow)){pd=pd.filter(d=>d!==dow);el.classList.remove('sel')}
-  else{pd.push(dow);el.classList.add('sel')}
-  S.s('fp_rd',pd);renderSettings();chkPresetRest();
+function chgType(t) {
+  pet.type = t; savePet(); renderPet(); renderSettings();
+  document.getElementById('ed-type').style.display = 'none';
+  toastMsg('Pet changed! 🎉');
 }
-function showMod(){document.getElementById('modal').classList.add('on')}
-function closeMod(){document.getElementById('modal').classList.remove('on')}
-function doRelease(){closeMod();localStorage.clear();location.reload()}
+function buildRdPills() {
+  const pd = S.g('fp_rd') || [];
+  document.getElementById('rdPills').innerHTML = DN.map((n,i) =>
+    `<div class="rdp ${pd.includes(i)?'sel':''}" onclick="togRdPreset(${i},this)">${DS[i]}</div>`
+  ).join('');
+}
+function togRdPreset(dow, el) {
+  let pd = S.g('fp_rd') || [];
+  if (pd.includes(dow)) { pd = pd.filter(d => d!==dow); el.classList.remove('sel'); }
+  else { pd.push(dow); el.classList.add('sel'); }
+  S.s('fp_rd', pd); renderSettings(); chkPresetRest();
+}
+function showMod()  { document.getElementById('modal').classList.add('on'); }
+function closeMod() { document.getElementById('modal').classList.remove('on'); }
+function doRelease() { closeMod(); localStorage.clear(); location.reload(); }
 
 /* LEVEL UP */
-function showLv(){
-  const sp=document.getElementById('lvSplash');
-  document.getElementById('lvEm').textContent=pEmoji();
-  document.getElementById('lvTt').textContent=`Level ${pet.level}!`;
-  document.getElementById('lvTx').textContent=`${pet.name} grew stronger! Keep focusing! 💪`;
+function showLv() {
+  setTimeout(() => playSfx('levelup'), 150);
+  const sp = document.getElementById('lvSplash');
+  document.getElementById('lvEm').textContent = pEmoji();
+  document.getElementById('lvTt').textContent = `Level ${pet.level}!`;
+  document.getElementById('lvTx').textContent = `${pet.name} grew stronger! Keep focusing! 💪`;
   sp.classList.add('on');
 }
-function closeLv(){document.getElementById('lvSplash').classList.remove('on');renderPet()}
+function closeLv() { document.getElementById('lvSplash').classList.remove('on'); renderPet(); }
 
 /* TOAST */
 let _tt;
-function toastMsg(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('on'),2800)}
+function toastMsg(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('on'), 2800);
+}
 
 /* TABS */
-function goTab(t){
-  ['home','stats','awards','settings'].forEach(k=>{
-    document.getElementById(`t-${k}`).classList.toggle('on',k===t);
-    document.getElementById(`n-${k}`).classList.toggle('on',k===t);
+function goTab(t) {
+  ['home','stats','awards','settings'].forEach(k => {
+    document.getElementById(`t-${k}`).classList.toggle('on', k===t);
+    document.getElementById(`n-${k}`).classList.toggle('on', k===t);
   });
-  if(t==='stats')renderStats();
-  if(t==='awards')renderAwards();
-  if(t==='settings')renderSettings();
+  if (t === 'stats')    renderStats();
+  if (t === 'awards')   renderAwards();
+  if (t === 'settings') renderSettings();
 }
-document.addEventListener('click', unlockAudio);
-document.addEventListener('touchstart', unlockAudio);
+
+/* ════════════════════════════════════════
+   HANDLE BACKGROUND / FOREGROUND
+════════════════════════════════════════ */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && mode === 'running') {
+    // Recalculate from stored endTime when coming back
+    if (endTime) {
+      const remaining = Math.round((endTime - Date.now()) / 1000);
+      if (remaining <= 0) {
+        // Session ended while backgrounded — trigger tick immediately
+        secsLeft = 0;
+        doTick();
+      } else {
+        secsLeft = remaining;
+        renderTimerFace();
+      }
+    }
+  }
+});
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
 requestNoti();
 boot();
+
+/* ════════════════════════════════════════
+   PWA SERVICE WORKER
+════════════════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .catch(e => console.log('SW registration failed:', e));
+  });
+}
 </script>
 </body>
 </html>
